@@ -1,0 +1,2 @@
+# copytrading-demotracking
+Tracking follower
