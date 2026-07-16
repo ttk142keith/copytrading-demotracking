@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo — Màn hình Người theo dõi (Leader)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14161A;
+    --ink-2:#5B616E;
+    --ink-3:#8B909C;
+    --line:#E4E6EA;
+    --line-2:#D3D6DC;
+    --canvas:#F2F3F5;
+    --card:#FFFFFF;
+    --tile:#F6F7F9;
+    --blue:#2A6FD6;
+    --blue-bg:#E8F0FB;
+    --red:#D2413F;
+    --red-bg:#FBEBEB;
+    --green:#1F7A45;
+    --amber-bg:#FBF3E2;
+    --amber-ink:#7A5510;
+    --r:10px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--canvas);
+    font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink);
+    font-size:14px;
+    line-height:1.5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 56px;
+    font-variant-numeric:tabular-nums;
+  }
+  .stage-label{
+    font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;
+    margin:0 0 14px;font-weight:500;
+  }
+  .phone{
+    width:390px;max-width:100%;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:22px;
+    overflow:hidden;
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 20px 3px;font-size:12px;font-weight:500;color:var(--ink);
+  }
+  .statusbar .icons{display:flex;gap:5px;color:var(--ink-2)}
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 16px 12px;
+  }
+  .nav .back{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500}
+  .nav svg{display:block}
+  .body{padding:0 16px 20px;position:relative}
+
+  .seg{
+    display:flex;gap:2px;background:var(--tile);border-radius:var(--r);padding:3px;margin-bottom:8px;
+  }
+  .seg button{
+    flex:1;border:0;background:transparent;border-radius:8px;
+    font-family:inherit;font-size:13px;color:var(--ink-2);padding:7px 0;cursor:pointer;
+    transition:background .12s ease,color .12s ease;
+  }
+  .seg button[aria-selected="true"]{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line)}
+  .seg button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+
+  .lbl{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-2);margin:0 0 3px}
+  .hero{display:flex;align-items:baseline;gap:8px}
+  .hero .num{font-size:52px;font-weight:600;letter-spacing:-.035em;line-height:1.05}
+  .hero .unit{font-size:15px;color:var(--ink-2)}
+  .hero .delta{margin-left:auto;font-size:13px;color:var(--green);font-weight:500}
+  .hero .delta.neg{color:var(--red)}
+
+  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .eyebrow{margin:20px 0 7px;font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+  .tile{background:var(--tile);border-radius:var(--r);padding:10px 10px 11px}
+  .tile .lbl{font-size:11px;margin-bottom:2px;gap:3px}
+  .tile .v{font-size:20px;font-weight:600;letter-spacing:-.02em}
+  .tile .v span{font-size:11px;font-weight:400;color:var(--ink-2);letter-spacing:0}
+
+  .info{
+    border:0;background:transparent;padding:0;margin:0;cursor:pointer;
+    color:var(--ink-3);display:inline-flex;line-height:0;
+  }
+  .info:hover{color:var(--ink-2)}
+  .info:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:50%}
+
+  #caret{position:absolute;z-index:21;width:12px;height:12px;background:var(--card);
+    border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);
+    transform:rotate(45deg);display:none;margin:0;animation:popIn .12s ease-out}
+  #panel{position:absolute;left:16px;right:16px;z-index:20;
+    background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);
+    padding:11px 12px;display:none;margin:0;animation:popIn .12s ease-out;
+    box-shadow:0 10px 28px rgba(20,22,26,.14),0 2px 6px rgba(20,22,26,.06)}
+  @keyframes popIn{from{opacity:0}to{opacity:1}}
+  #panel h4{margin:0 0 4px;font-size:12px;font-weight:600}
+  #panel p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.6}
+
+  .sec{margin-top:24px}
+  .sec-head{display:flex;align-items:center;gap:5px;margin:0 0 3px}
+  .sec-head h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
+  .sec-sub{margin:0 0 10px;font-size:11px;color:var(--ink-3)}
+  .chart-cap{margin:0 0 6px;font-size:11.5px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:5px}
+  .chart-cap span{font-weight:400;color:var(--ink-3)}
+  .legend{display:flex;gap:14px;font-size:11px;color:var(--ink-2);margin-bottom:8px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .legend .dash{width:13px;height:0;border-top:2px dashed var(--ink-3);border-radius:0;vertical-align:4px}
+  .chartbox{position:relative;width:100%;height:190px}
+
+
+  .rowhead{display:flex;align-items:center;justify-content:space-between}
+  .rowhead a{font-size:12px;color:var(--blue);text-decoration:none;font-weight:500}
+  .people{border-top:1px solid var(--line);margin-top:10px}
+  .person{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .person:last-child{border-bottom:0}
+  .av{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex:none}
+  .person .nm{margin:0;font-size:13.5px;font-weight:500}
+  .person .mt{margin:0;font-size:11px;color:var(--ink-2)}
+  .person .grow{flex:1;min-width:0}
+  .person .due{font-size:11px;color:var(--ink-2);flex:none;font-weight:500}
+  .person .due.soon{color:var(--red)}
+
+  .caption{max-width:390px;margin:20px auto 0;font-size:12px;color:var(--ink-3);line-height:1.7}
+  .caption b{color:var(--ink-2);font-weight:500}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<p class="stage-label">Demo A · Hai biểu đồ xếp chồng</p>
+
+<div class="phone">
+  <div class="statusbar">
+    <span>9:41</span>
+    <span class="icons">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" y="0" width="3" height="11" rx=".5"/></svg>
+      <svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x=".5" y=".5" width="17" height="10" rx="2.5" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="12" height="7" rx="1.2" fill="currentColor"/><path d="M19.5 4v3c.9-.4.9-2.6 0-3z" fill="currentColor" opacity=".45"/></svg>
+    </span>
+  </div>
+
+  <div class="nav">
+    <span class="back">
+      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1L1.5 7.5 8 14"/></svg>
+      Người theo dõi tôi
+    </span>
+  </div>
+
+  <div class="body">
+
+    <p class="lbl">Đang theo dõi
+      <button class="info" data-info="active" aria-label="Giải thích chỉ số đang theo dõi">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
+      </button>
+    </p>
+    <div class="hero">
+      <span class="num" id="heroNum">248</span>
+      <span class="unit">người</span>
+      <span class="delta" id="heroDelta">+22 so với tháng trước</span>
+    </div>
+
+    <p class="eyebrow">Trong tháng này</p>
+    <div class="tiles">
+      <div class="tile">
+        <p class="lbl">Người mới
+          <button class="info" data-info="moi" aria-label="Giải thích chỉ số người mới">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
+          </button>
+        </p>
+        <p class="v" id="tMoi">31</p>
+      </div>
+      <div class="tile">
+        <p class="lbl">Rời đi
+          <button class="info" data-info="roi" aria-label="Giải thích chỉ số rời đi">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
+          </button>
+        </p>
+        <p class="v" id="tRoi">9</p>
+      </div>
+      <div class="tile">
+        <p class="lbl">Theo dõi TB
+          <button class="info" data-info="tb" aria-label="Giải thích chỉ số theo dõi trung bình">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
+          </button>
+        </p>
+        <p class="v">7,2 <span>tháng</span></p>
+      </div>
+    </div>
+
+    <div id="caret"></div>
+    <div id="panel" role="status"><h4 id="pTitle"></h4><p id="pBody"></p></div>
+
+    <div class="sec">
+      <div class="sec-head">
+        <h3>Người theo dõi qua thời gian</h3>
+      </div>
+      <div class="seg" role="tablist" aria-label="Khoảng thời gian">
+        <button role="tab" data-mode="ngay" aria-selected="false">Ngày</button>
+        <button role="tab" data-mode="tuan" aria-selected="false">Tuần</button>
+        <button role="tab" data-mode="thang" aria-selected="true">Tháng</button>
+      </div>
+
+      <p class="sec-sub" id="chartSub">6 tháng gần nhất</p>
+
+      <p class="chart-cap">Tổng đang theo dõi <span id="capTotal">cuối mỗi tháng</span><button class="info" data-info="total" aria-label="Giải thích biểu đồ tổng đang theo dõi"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg></button></p>
+      <div class="chartbox" style="height:118px">
+        <canvas id="chartTotal" role="img" aria-label="Biểu đồ đường tổng số người đang theo dõi ở cuối mỗi kỳ">Tổng số người đang theo dõi ở cuối mỗi kỳ.</canvas>
+      </div>
+
+      <p class="chart-cap" style="margin-top:14px">Ai vào, ai rời trong kỳ<button class="info" data-info="flow" aria-label="Giải thích biểu đồ ai vào ai rời"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg></button></p>
+      <div class="legend">
+        <span><i style="background:#2A6FD6"></i>Người mới</span>
+        <span><i style="background:#D2413F"></i>Rời đi</span>
+        <span><i class="dash"></i>Tăng ròng</span>
+      </div>
+      <div class="chartbox" style="height:150px">
+        <canvas id="chart" role="img" aria-label="Biểu đồ cột số người theo dõi mới và số người rời đi theo từng kỳ">Số người mới và số người rời đi theo kỳ.</canvas>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="rowhead">
+        <h3 style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em">Người theo dõi</h3>
+        <a href="#" onclick="return false">Xem tất cả (248)</a>
+      </div>
+      <p class="sec-sub" style="margin-top:2px">Sắp đến hạn gia hạn trong 7 ngày</p>
+      <div class="people">
+        <div class="person">
+          <div class="av">NH</div>
+          <div class="grow"><p class="nm">Nguyễn Văn Hùng</p><p class="mt">Đã theo dõi 4 tháng</p></div>
+          <span class="due soon">Còn 2 ngày</span>
+        </div>
+        <div class="person">
+          <div class="av">TM</div>
+          <div class="grow"><p class="nm">Trần Thị Mai</p><p class="mt">Đã theo dõi 11 tháng</p></div>
+          <span class="due">Còn 6 ngày</span>
+        </div>
+        <div class="person">
+          <div class="av">LĐ</div>
+          <div class="grow"><p class="nm">Lê Quốc Đạt</p><p class="mt">Đã theo dõi 1 tháng</p></div>
+          <span class="due">Còn 7 ngày</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="caption">
+  <b>Cách xem demo:</b> khối số phía trên luôn là tình hình <b>tháng này</b> — không đổi theo bộ chọn kỳ. Bộ chọn Ngày / Tuần / Tháng nằm ngay trên biểu đồ và chỉ đổi biểu đồ. Chạm vào biểu đồ để xem chi tiết từng kỳ, bấm ⓘ ở bất kỳ chỉ số nào để xem giải thích. Dữ liệu mẫu, giá gói giả định 200.000đ/tháng, phí nền tảng 20%.
+</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const INFO = {
+  active:['Đang theo dõi','Số người đang trả phí và xem được thông tin của bạn ngay lúc này. Người đã hết hạn mà không gia hạn thì không còn được tính.'],
+  moi:['Người mới','Số người bắt đầu trả phí theo dõi bạn trong tháng này. Người từng rời đi rồi quay lại vẫn được tính là người mới.'],
+  roi:['Rời đi','Số người ngừng theo dõi trong tháng này — gồm cả người chủ động hủy và người hết hạn mà không gia hạn.'],
+  tb:['Theo dõi trung bình','Một người gắn bó với bạn được bao lâu trước khi rời đi, tính trên những người đã rời trong 12 tháng qua. Số càng cao nghĩa là bạn giữ chân càng tốt.'],
+  total:['Tổng đang theo dõi','Số người đang trả phí ở cuối mỗi kỳ. Đường đi lên là kỳ đó bạn có thêm người, đi xuống là mất người. Chạm vào đường để xem số người kèm số tiền tương ứng.'],
+  flow:['Ai vào, ai rời trong kỳ','Cột xanh phía trên vạch 0 là số người mới vào, cột đỏ phía dưới là số người rời đi trong kỳ đó. Đường nét đứt là chênh lệch giữa hai bên: nằm trên vạch 0 nghĩa là kỳ đó bạn tăng người theo dõi, dưới vạch 0 là giảm.']
+};
+
+const DATA = {
+  thang:{
+    labels:['T2','T3','T4','T5','T6','T7'],
+    moi:[18,24,15,29,26,31],
+    roi:[5,7,12,6,8,9],
+    sub:'6 tháng gần nhất',
+    start:152,
+    cap:'cuối mỗi tháng',
+    deltaLabel:'so với tháng trước'
+  },
+  tuan:{
+    labels:['27/4','4/5','11/5','18/5','25/5','1/6','8/6','15/6','22/6','29/6','6/7','13/7'],
+    moi:[6,8,5,9,7,6,8,10,5,7,9,6],
+    roi:[2,1,3,2,1,2,0,3,2,1,4,2],
+    sub:'12 tuần gần nhất',
+    start:185,
+    cap:'cuối mỗi tuần',
+    deltaLabel:'so với tuần trước'
+  },
+  ngay:{
+    labels:[],
+    moi:[1,0,2,1,0,0,3,1,1,0,2,0,1,4,2,0,1,1,0,2,1,0,3,1,0,1,2,0,0,1],
+    roi:[0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,1,0],
+    sub:'30 ngày gần nhất',
+    start:226,
+    cap:'cuối mỗi ngày',
+    deltaLabel:'so với hôm qua'
+  }
+};
+(function(){
+  const end = new Date(2026,6,15);
+  for(let i=29;i>=0;i--){
+    const d = new Date(end); d.setDate(end.getDate()-i);
+    DATA.ngay.labels.push(d.getDate()+'/'+(d.getMonth()+1));
+  }
+})();
+
+const fmt = n => n.toLocaleString('vi-VN');
+let chart, chartTotal, mode='thang', openKey=null;
+const PRICE=200000, FEE=.2;
+const money = n => (n*PRICE*(1-FEE)/1e6).toFixed(1).replace('.',',')+' tr';
+const AXIS_W = 34;
+
+const panel=document.getElementById('panel'), caret=document.getElementById('caret');
+const pTitle=document.getElementById('pTitle'), pBody=document.getElementById('pBody');
+
+// Chú thích là lớp nổi: định vị tuyệt đối trong .body nên không đẩy nội dung bên dưới.
+function place(btn){
+  const host = panel.parentElement.getBoundingClientRect();
+  const r = btn.getBoundingClientRect();
+  const top = r.bottom - host.top + 9;
+  panel.style.top = Math.round(top) + 'px';
+  caret.style.top = Math.round(top - 6) + 'px';
+  const x = Math.max(22, Math.min(host.width - 34, r.left - host.left + r.width/2 - 6));
+  caret.style.left = Math.round(x) + 'px';
+}
+function closePop(){
+  panel.style.display='none'; caret.style.display='none'; openKey=null;
+}
+document.querySelectorAll('.info').forEach(btn=>{
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const k=btn.dataset.info;
+    if(openKey===k){closePop();return;}
+    openKey=k;
+    pTitle.textContent=INFO[k][0];
+    pBody.textContent=INFO[k][1];
+    panel.style.display='block';caret.style.display='block';
+    place(btn);
+  });
+});
+document.addEventListener('click',e=>{
+  if(openKey && !e.target.closest('#panel')) closePop();
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && openKey) closePop(); });
+window.addEventListener('resize',()=>{ if(openKey) closePop(); });
+
+// Khối số trên cùng luôn là tháng mới nhất — không đổi theo bộ chọn kỳ.
+function renderHeader(){
+  const d=DATA.thang, i=d.moi.length-1;
+  document.getElementById('tMoi').textContent=fmt(d.moi[i]);
+  document.getElementById('tRoi').textContent=fmt(d.roi[i]);
+  const net=d.moi[i]-d.roi[i], el=document.getElementById('heroDelta');
+  el.className='delta'+(net<0?' neg':'');
+  el.textContent = net===0 ? 'Không đổi so với tháng trước'
+                           : (net>0?'+':'')+fmt(net)+' so với tháng trước';
+}
+
+function render(){
+  const d=DATA[mode];
+  document.getElementById('chartSub').textContent=d.sub;
+
+  document.getElementById('capTotal').textContent=d.cap;
+
+  let run=d.start;
+  const total=d.moi.map((v,i)=>{run+=v-d.roi[i];return run;});
+  const net=d.moi.map((v,i)=>v-d.roi[i]);
+
+  const tick={color:'#8B909C',font:{size:10,family:"'Be Vietnam Pro'"}};
+  const tip={
+    backgroundColor:'#14161A',padding:10,cornerRadius:8,boxWidth:8,boxHeight:8,boxPadding:3,
+    titleFont:{family:"'Be Vietnam Pro'",size:12,weight:'600'},
+    bodyFont:{family:"'Be Vietnam Pro'",size:12}
+  };
+
+  if(chartTotal) chartTotal.destroy();
+  chartTotal=new Chart(document.getElementById('chartTotal'),{
+    type:'line',
+    data:{labels:d.labels,datasets:[{
+      label:'Đang theo dõi',data:total,
+      borderColor:'#14161A',borderWidth:2,tension:.3,
+      fill:true,backgroundColor:'rgba(42,111,214,.09)',
+      pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:'#14161A'
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:4}},
+      scales:{
+        x:{grid:{display:false},border:{display:false},ticks:{display:false}},
+        y:{grid:{color:'#EDEFF2'},border:{display:false},ticks:{...tick,maxTicksLimit:4},
+           afterFit:s=>{s.width=AXIS_W}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{...tip,displayColors:false,callbacks:{
+          label:c=>' '+fmt(c.parsed.y)+' người  ·  ≈ '+money(c.parsed.y)+' thực nhận'
+        }}
+      }
+    }
+  });
+
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById('chart'),{
+    data:{
+      labels:d.labels,
+      datasets:[
+        {type:'bar',label:'Người mới',data:d.moi,backgroundColor:'#2A6FD6',borderRadius:{topLeft:3,topRight:3},maxBarThickness:mode==='ngay'?7:16},
+        {type:'bar',label:'Rời đi',data:d.roi.map(v=>-v),backgroundColor:'#D2413F',borderRadius:{bottomLeft:3,bottomRight:3},maxBarThickness:mode==='ngay'?7:16},
+        {type:'line',label:'Tăng ròng',data:net,stack:'net',
+         borderColor:'#5B616E',borderWidth:1.5,borderDash:[4,3],tension:.3,
+         pointRadius:0,pointHoverRadius:3.5,pointHoverBackgroundColor:'#5B616E'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      scales:{
+        x:{stacked:true,grid:{display:false},border:{color:'#D3D6DC'},
+           ticks:{...tick,autoSkip:mode==='ngay',maxRotation:0,maxTicksLimit:mode==='ngay'?6:12}},
+        y:{stacked:true,grid:{color:'#EDEFF2'},border:{display:false},
+           ticks:{...tick,callback:v=>Math.abs(v)},afterFit:s=>{s.width=AXIS_W}}
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{...tip,displayColors:true,callbacks:{
+          label:c=>c.dataset.type==='line'
+            ? '  Tăng ròng: '+(c.parsed.y>0?'+':'')+fmt(c.parsed.y)+' người'
+            : '  '+c.dataset.label+': '+fmt(Math.abs(c.parsed.y))+' người'
+        }}
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.seg button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-selected','false'));
+    b.setAttribute('aria-selected','true');
+    mode=b.dataset.mode;
+    closePop();
+    render();
+  });
+});
+renderHeader();
+render();
+</script>
+</body>
+</html>
