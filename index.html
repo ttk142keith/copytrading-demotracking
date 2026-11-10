@@ -24,6 +24,7 @@
     --up:#12A150;      --up-pale:#B7E4C7;   --up-ink:#0E8A43;
     --down:#F04438;    --down-pale:#FBC9C5; --down-ink:#D92D20;
     --renew:#DFA922;   --renew-pale:#F3DFA2;--renew-ink:#9A7200;
+    --total:#2563EB;   --total-ink:#1D4ED8;
     --tip:#2B2D31;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -50,10 +51,20 @@
   .seg button{flex:1;border:0;background:transparent;border-radius:8px;font-size:13px;color:var(--ink-2);padding:7px 0;cursor:pointer;transition:background .12s,color .12s}
   .seg button[aria-pressed="true"]{background:var(--card);color:var(--brand);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.10)}
 
-  .chips{display:flex;gap:6px}
-  .chips button{flex:1;border:0;background:var(--chip);border-radius:8px;font-size:13px;color:var(--ink);padding:7px 0;cursor:pointer;white-space:nowrap;transition:background .12s}
+  .chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chips button{flex:1 1 auto;border:0;background:var(--chip);border-radius:8px;font-size:13px;color:var(--ink);padding:7px 3px;cursor:pointer;white-space:nowrap;transition:background .12s}
   .chips button[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-ink);font-weight:500}
   .chips[hidden]{display:none}
+
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+  .kpi{background:var(--screen);border-radius:10px;padding:9px 12px 10px;min-width:0}
+  .kpi span{display:block;font-size:12px;color:var(--ink-2);white-space:nowrap}
+  .kpi p{margin:2px 0 0;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+  .kpi b{font-size:18px;font-weight:600;letter-spacing:-.01em;line-height:1.25}
+  .kpi small{font-size:12px;font-weight:500;color:var(--ink-2)}
+  .kpi small.up{color:var(--up-ink)}
+  .kpi small.down{color:var(--down-ink)}
   button:focus-visible,.vp:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 
   .block{padding:12px 12px 14px;border-top:1px solid var(--line)}
@@ -67,12 +78,11 @@
   .yaxis text{font-size:11px;fill:var(--ink-3)}
   .vp{flex:1;min-width:0;overflow:hidden;cursor:crosshair;touch-action:pan-y;border-radius:4px}
   .band{fill:rgba(16,24,40,.08)}
-  .plot.dense .seg-up,.plot.dense .seg-new{fill:var(--up)}
-  .plot.dense .seg-down{fill:var(--down)}
-  .plot.dense .seg-renew{fill:var(--renew)}
-  .vp.dragging{cursor:grabbing;user-select:none}
-  .vp::-webkit-scrollbar{height:4px}
-  .vp::-webkit-scrollbar-thumb{background:#D5D8DD;border-radius:2px}
+  .yaxis2{flex:0 0 30px;display:block}
+  .yaxis2 text{font-size:11px;fill:var(--total-ink)}
+  .tline{fill:none;stroke:var(--total);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .tdot{fill:var(--total);stroke:#fff;stroke-width:1.5}
+  .tsel{fill:var(--total);stroke:#fff;stroke-width:2}
   .plot{display:block}
   .grid{stroke:#DADDE2;stroke-dasharray:4 4}
   .zero{stroke:#C4C8CF}
@@ -82,10 +92,12 @@
   .slot.sel .hit{fill:rgba(16,24,40,.05)}
   .xl{font-size:10.5px;fill:var(--ink-3)}
   .slot.sel .xl{fill:var(--ink);font-weight:600}
-  .seg-up{fill:var(--up-pale)}      .slot.sel .seg-up{fill:var(--up)}
-  .seg-down{fill:var(--down-pale)}  .slot.sel .seg-down{fill:var(--down)}
-  .seg-new{fill:var(--up-pale)}     .slot.sel .seg-new{fill:var(--up)}
-  .seg-renew{fill:var(--renew-pale)}.slot.sel .seg-renew{fill:var(--renew)}
+  .seg-up,.seg-new{fill:var(--up)}
+  .seg-down{fill:var(--down)}
+  .seg-renew{fill:var(--renew)}
+  .has-sel .slot:not(.sel) .seg-up,.has-sel .slot:not(.sel) .seg-new{fill:var(--up-pale)}
+  .has-sel .slot:not(.sel) .seg-down{fill:var(--down-pale)}
+  .has-sel .slot:not(.sel) .seg-renew{fill:var(--renew-pale)}
 
   .tip{position:absolute;z-index:2;background:var(--tip);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.55;white-space:nowrap;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.18)}
   .tip[hidden]{display:none}
@@ -97,14 +109,18 @@
   .tip .r span{color:#D6D8DC}
   .tip .r b{font-weight:600;margin-left:auto;padding-left:8px}
 
-  .legend{display:flex;justify-content:center;gap:10px;margin-top:8px}
-  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid currentColor;background:#fff;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:500;cursor:pointer}
+  .legend{display:flex;justify-content:center;gap:8px;margin-top:8px}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid currentColor;background:#fff;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:500;cursor:pointer;white-space:nowrap}
   .pill i{width:8px;height:8px;border-radius:2px;background:var(--sw)}
   .pill[data-key="up"],.pill[data-key="new"]{color:var(--up-ink);--sw:var(--up)}
   .pill[data-key="down"]{color:var(--down-ink);--sw:var(--down)}
   .pill[data-key="renew"]{color:var(--renew-ink);--sw:var(--renew)}
   .pill[aria-pressed="false"]{color:var(--ink-3);text-decoration:line-through}
   .pill[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+  .pill[data-key="total"]{color:var(--total-ink);--sw:var(--total)}
+  .pill[data-key="total"] i{width:14px;height:2px;border-radius:1px}
+  .pill[data-key="total"][aria-pressed="false"]{color:var(--ink-3)}
+  .pill[data-key="total"][aria-pressed="false"] i{background:var(--ink-3);box-shadow:none}
 
   @media (max-width:430px){
     body{padding:0;background:var(--screen)}
@@ -132,12 +148,23 @@
         <button type="button" data-mode="day" aria-pressed="true">Ngày</button>
         <button type="button" data-mode="month" aria-pressed="false">Tháng</button>
       </div>
-      <div class="chips" id="chips" role="group" aria-label="Khung thời gian">
+      <div class="chips" data-mode="day" role="group" aria-label="Khung thời gian xem theo ngày">
         <button type="button" data-range="1" aria-pressed="true">1 tháng</button>
         <button type="button" data-range="3" aria-pressed="false">3 tháng</button>
         <button type="button" data-range="6" aria-pressed="false">6 tháng</button>
         <button type="button" data-range="12" aria-pressed="false">1 năm</button>
       </div>
+      <div class="chips" data-mode="month" role="group" aria-label="Khung thời gian xem theo tháng" hidden>
+        <button type="button" data-range="6" aria-pressed="false">6 tháng</button>
+        <button type="button" data-range="9" aria-pressed="false">9 tháng</button>
+        <button type="button" data-range="12" aria-pressed="true">1 năm</button>
+        <button type="button" data-range="ytd" aria-pressed="false">Từ đầu năm</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi"><span>Tổng TK đang theo dõi</span><p><b id="kTotal"></b><small id="kNet"></small></p></div>
+      <div class="kpi"><span>Thu nhập kỳ này</span><p><b id="kFee"></b><small>đ</small></p></div>
     </div>
 
     <section class="block">
@@ -146,15 +173,17 @@
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="5" r=".5" fill="currentColor"/></svg>
         </button>
       </h2>
-      <p class="hint" id="hintFollow" hidden>Mỗi cột là biến động ròng số tài khoản (TK) theo dõi trong kỳ: TK theo dõi mới trừ TK hủy theo dõi, gồm cả TK bị hủy do không đủ số dư gia hạn. Gia hạn không làm thay đổi số TK.</p>
+      <p class="hint" id="hintFollow" hidden>Mỗi cột là biến động ròng số tài khoản (TK) theo dõi trong kỳ: TK theo dõi mới trừ TK hủy theo dõi, gồm cả TK bị hủy do không đủ số dư gia hạn. Gia hạn không làm thay đổi số TK. Đường màu xanh dương là tổng TK theo dõi cuối mỗi kỳ, đọc theo trục bên phải.</p>
       <div class="chart" id="chartFollow">
         <svg class="yaxis" aria-hidden="true"></svg>
-        <div class="vp" tabindex="0" role="group" aria-label="Biểu đồ cột biến động tài khoản theo dõi. Dùng phím mũi tên trái phải để chọn cột."><svg class="plot"></svg></div>
+        <div class="vp" tabindex="0" role="group" aria-label="Biểu đồ cột biến động và đường tổng tài khoản theo dõi. Dùng phím mũi tên trái phải để chọn cột."><svg class="plot"></svg></div>
+        <svg class="yaxis2" aria-hidden="true"></svg>
         <div class="tip" role="status" hidden></div>
       </div>
       <div class="legend">
-        <button type="button" class="pill" data-key="up" aria-pressed="true"><i></i>Số lượng tăng</button>
-        <button type="button" class="pill" data-key="down" aria-pressed="true"><i></i>Số lượng giảm</button>
+        <button type="button" class="pill" data-key="up" aria-pressed="true"><i></i>Tăng</button>
+        <button type="button" class="pill" data-key="down" aria-pressed="true"><i></i>Giảm</button>
+        <button type="button" class="pill" data-key="total" aria-pressed="true"><i></i>Tổng theo dõi</button>
       </div>
     </section>
 
@@ -290,7 +319,7 @@ function dayBuckets(months) {
   }));
 }
 
-function monthBuckets() {
+function monthBuckets(range) { // range: số tháng gần nhất | 'ytd' (từ đầu năm)
   const map = new Map();
   for (const x of DAYS) {
     const k = x.y * 12 + x.m;
@@ -301,15 +330,26 @@ function monthBuckets() {
     }
     b.net += x.net; b.total = x.total; b.feeNew += x.feeNew; b.feeRenew += x.feeRenew;
   }
-  const list = [...map.values()].slice(-12);
-  const last = list[list.length - 1];
+  const all = [...map.values()];
+  const last = all[all.length - 1];
+  const list = range === 'ytd' ? all.filter(b => b.y === TODAY.y) : all.slice(-range);
   const monthEnd = new Date(TODAY.y, TODAY.m, 0).getDate();
   if (TODAY.dd < monthEnd) last.title += ` (đến ${pad2(TODAY.dd)}/${pad2(TODAY.m)})`;
   return list;
 }
 
 /* ---------- chart ---------- */
-const AW = 42, PT = 14, PH = 200, LB = 46, H = PT + PH + LB, SLOT = 24, PADL = 8;
+const AW = 42, AW2 = 30, PT = 14, PH = 200, LB = 46, H = PT + PH + LB, PADL = 12;
+
+// Trục phụ (bên phải) cho đường Tổng TK: chia đúng k khoảng để vạch chia trùng với lưới của trục trái
+function alignedScale(min, max, k) {
+  for (let p = 0; p < 9; p++) for (const cnd of [1, 2, 2.5, 4, 5]) {
+    const step = cnd * Math.pow(10, p);
+    if (step % 1) continue;                       // số TK là số nguyên
+    const lo = Math.floor(min / step) * step;
+    if (lo + k * step >= max) return { lo, hi: lo + k * step, step };
+  }
+}
 
 function niceScale(min, max, integer) {
   if (min === 0 && max === 0) max = integer ? 4 : 400000;
@@ -337,24 +377,32 @@ const charts = [];
 function makeChart(id, cfg) {
   const root = document.getElementById(id);
   const c = {
-    root, cfg, yaxis: $('.yaxis', root), vp: $('.vp', root), plot: $('.plot', root), tip: $('.tip', root),
-    on: Object.fromEntries(cfg.keys.map(k => [k, true])), buckets: [], sums: [], geom: [], sel: -1, fit: false, barW: 14
+    root, cfg, yaxis: $('.yaxis', root), yaxis2: $('.yaxis2', root), vp: $('.vp', root), plot: $('.plot', root), tip: $('.tip', root),
+    on: Object.fromEntries(cfg.keys.map(k => [k, true])), buckets: [], sums: [], geom: [], lineY: null, sel: -1, slotW: 1, barW: 14
   };
   charts.push(c);
 
-  // chọn cột: chạm, hoặc rê ngón tay / chuột ngang biểu đồ để dò từng cột (cột hẹp nên không bắt chạm trúng)
-  let down = false;
+  // Chọn cột. Mặc định không cột nào được chọn (tất cả đậm màu); khi chọn 1 cột thì các cột khác mờ đi.
+  //  - Chuột: rê tới đâu chọn tới đó, rời biểu đồ thì bỏ chọn.
+  //  - Cảm ứng: chạm hoặc rê ngang để chọn; chạm lại đúng cột đang chọn, hoặc chạm ra ngoài, để bỏ chọn.
+  let down = false, startSel = -1, changed = false;
+  const clear = () => { if (c.sel !== -1) { c.sel = -1; applySel(c); } };
   const pick = e => {
     const n = c.buckets.length;
     const x = e.clientX - c.vp.getBoundingClientRect().left;
     const i = Math.min(n - 1, Math.max(0, Math.floor((x - PADL) / c.slotW)));
-    if (i !== c.sel) { c.sel = i; applySel(c); }
+    if (i !== c.sel) { c.sel = i; changed = true; applySel(c); }
   };
-  c.vp.addEventListener('pointerdown', e => { down = true; pick(e); });
+  c.vp.addEventListener('pointerdown', e => { down = true; startSel = c.sel; changed = false; pick(e); });
   c.vp.addEventListener('pointermove', e => { if (down || e.pointerType === 'mouse') pick(e); });
+  c.vp.addEventListener('pointerup', e => { if (e.pointerType !== 'mouse' && !changed && startSel === c.sel) clear(); });
+  c.vp.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') clear(); });
+  c.vp.addEventListener('blur', clear);
   window.addEventListener('pointerup', () => { down = false; });
   window.addEventListener('pointercancel', () => { down = false; });
+  document.addEventListener('pointerdown', e => { if (!c.root.contains(e.target)) clear(); });
   c.vp.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { clear(); return; }
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
     e.preventDefault();
     const n = c.buckets.length;
@@ -367,14 +415,17 @@ function makeChart(id, cfg) {
     if (c.on[k] && cfg.keys.filter(x => c.on[x]).length === 1) return; // luôn giữ ít nhất 1 chuỗi
     c.on[k] = !c.on[k];
     p.setAttribute('aria-pressed', c.on[k]);
-    render(c, true);
+    render(c);
   }));
   return c;
 }
 
-function render(c, keepScroll) {
+function render(c) {
   const { cfg, buckets } = c;
   const n = buckets.length;
+  const lineOn = !!cfg.line && c.on[cfg.lineKey];
+  const barsOn = cfg.barKeys.some(k => c.on[k]);
+  if (c.yaxis2) c.yaxis2.style.display = lineOn ? '' : 'none';   // ẩn/hiện trục phụ trước khi đo bề ngang
   const vpW = c.vp.clientWidth;
   // mọi khung thời gian đều dồn vừa bề ngang màn hình: cột hẹp dần khi số cột tăng
   const slotW = (vpW - PADL) / n;
@@ -396,11 +447,27 @@ function render(c, keepScroll) {
   let axis = '', grid = '';
   for (const t of sc.ticks) {
     const yy = Math.round(y(t)) + 0.5;
-    axis += `<text x="${AW - 8}" y="${yy}" dy="0.35em" text-anchor="end">${cfg.fmtAxis(t)}</text>`;
-    grid += `<line class="${t === 0 ? 'zero' : 'grid'}" x1="0" x2="${W}" y1="${yy}" y2="${yy}"/>`;
+    if (barsOn) axis += `<text x="${AW - 8}" y="${yy}" dy="0.35em" text-anchor="end">${cfg.fmtAxis(t)}</text>`;
+    grid += `<line class="${t === 0 && barsOn ? 'zero' : 'grid'}" x1="0" x2="${W}" y1="${yy}" y2="${yy}"/>`;
   }
   c.yaxis.setAttribute('width', AW); c.yaxis.setAttribute('height', H);
   c.yaxis.innerHTML = axis;
+
+  c.lineY = null;
+  if (lineOn) {
+    const vals = buckets.map(cfg.line);
+    const k = sc.ticks.length - 1;
+    const rs = alignedScale(Math.min(...vals), Math.max(...vals), k);
+    const y2 = v => PT + PH * (rs.hi - v) / (rs.hi - rs.lo);
+    let axis2 = '';
+    for (let j = 0; j <= k; j++) {
+      const v = rs.lo + j * rs.step;
+      axis2 += `<text x="7" y="${Math.round(y2(v)) + 0.5}" dy="0.35em">${fmt(v)}</text>`;
+    }
+    c.yaxis2.setAttribute('width', AW2); c.yaxis2.setAttribute('height', H);
+    c.yaxis2.innerHTML = axis2;
+    c.lineY = vals.map(y2);
+  }
 
   let slots = '';
   c.geom = [];
@@ -424,13 +491,15 @@ function render(c, keepScroll) {
   });
   c.plot.setAttribute('width', W); c.plot.setAttribute('height', H);
   c.plot.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  c.plot.classList.toggle('dense', dense);
-  c.plot.innerHTML = grid + `<rect class="band" y="0" height="${PT + PH}" width="0"/>` + slots;
-
-  if (c.sel < 0 || c.sel >= n || c.sums[c.sel] === 0) {
-    c.sel = -1;
-    for (let i = n - 1; i >= 0; i--) if (c.sums[i] !== 0) { c.sel = i; break; }
+  let line = '';
+  if (c.lineY) {
+    line = `<path class="tline" d="${c.geom.map((g, i) => `${i ? 'L' : 'M'}${g.cx.toFixed(1)},${c.lineY[i].toFixed(1)}`).join('')}"/>`;
+    if (n <= 16) line += c.geom.map((g, i) => `<circle class="tdot" cx="${g.cx}" cy="${c.lineY[i]}" r="3"/>`).join('');
+    line += `<circle class="tsel" r="4.5" style="display:none"/>`;
   }
+  c.plot.innerHTML = grid + `<rect class="band" y="0" height="${PT + PH}" width="0"/>` + slots + line;
+
+  if (c.sel >= n) c.sel = -1;
   applySel(c);
 }
 
@@ -438,6 +507,12 @@ function applySel(c) {
   $$('.slot.sel', c.plot).forEach(g => g.classList.remove('sel'));
   const band = $('.band', c.plot), bw = Math.max(c.slotW, 2);
   band.setAttribute('width', c.sel >= 0 ? bw : 0);
+  c.plot.classList.toggle('has-sel', c.sel >= 0);
+  const dot = $('.tsel', c.plot);
+  if (dot) {
+    dot.style.display = c.sel >= 0 ? '' : 'none';
+    if (c.sel >= 0) { dot.setAttribute('cx', c.geom[c.sel].cx); dot.setAttribute('cy', c.lineY[c.sel]); }
+  }
   if (c.sel >= 0) {
     band.setAttribute('x', c.geom[c.sel].cx - bw / 2);
     $(`.slot[data-i="${c.sel}"]`, c.plot).classList.add('sel');
@@ -476,15 +551,16 @@ function positionTip(c) {
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
 makeChart('chartFollow', {
-  keys: ['up', 'down'], integer: true, fmtAxis: fmtAxisInt,
+  keys: ['up', 'down', 'total'], barKeys: ['up', 'down'], lineKey: 'total', line: b => b.total,
+  integer: true, fmtAxis: fmtAxisInt,
   segs: b => [{ key: b.net >= 0 ? 'up' : 'down', value: b.net }],
   tip: b => [
-    { label: 'Biến động TK', value: signed(b.net) },
-    { label: 'Tổng TK theo dõi', value: fmt(b.total) }
+    { sw: css(b.net < 0 ? '--down' : '--up'), label: 'Biến động TK', value: signed(b.net) },
+    { sw: css('--total'), label: 'Tổng TK theo dõi', value: fmt(b.total) }
   ]
 });
 makeChart('chartFee', {
-  keys: ['new', 'renew'], integer: false, fmtAxis: fmtAxisMoney,
+  keys: ['new', 'renew'], barKeys: ['new', 'renew'], integer: false, fmtAxis: fmtAxisMoney,
   segs: b => [{ key: 'new', value: b.feeNew }, { key: 'renew', value: b.feeRenew }],
   tip: b => [
     { sw: css('--renew'), label: 'Phí gia hạn', value: fmt(b.feeRenew) },
@@ -494,21 +570,33 @@ makeChart('chartFee', {
 });
 
 /* ---------- điều khiển ---------- */
-const state = { mode: 'day', range: 1 };
+// mỗi tab nhớ khung thời gian riêng của nó
+const state = { mode: 'day', day: '1', month: '12' };
 
 function update() {
   const isDay = state.mode === 'day';
-  const buckets = isDay ? dayBuckets(state.range) : monthBuckets();
+  const range = state[state.mode];
+  const buckets = isDay ? dayBuckets(+range) : monthBuckets(isNaN(range) ? range : +range);
 
   $$('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === state.mode));
-  $$('#chips button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.range === state.range));
-  $('#chips').hidden = !isDay;
+  $$('.chips').forEach(g => {
+    g.hidden = g.dataset.mode !== state.mode;
+    $$('button', g).forEach(b => b.setAttribute('aria-pressed', b.dataset.range === state[g.dataset.mode]));
+  });
 
-  for (const c of charts) { c.buckets = buckets; c.fit = !isDay; c.sel = -1; render(c, false); }
+  // 2 thẻ tóm tắt: "kỳ" = khung thời gian đang chọn
+  const sum = k => buckets.reduce((t, b) => t + b[k], 0);
+  const net = sum('net');
+  $('#kTotal').textContent = fmt(buckets[buckets.length - 1].total);
+  $('#kNet').textContent = `${signed(net)} trong kỳ`;
+  $('#kNet').className = net > 0 ? 'up' : net < 0 ? 'down' : '';
+  $('#kFee').textContent = fmt(sum('feeNew') + sum('feeRenew'));
+
+  for (const c of charts) { c.buckets = buckets; c.sel = -1; render(c); }
 }
 
 $$('.seg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; update(); }));
-$$('#chips button').forEach(b => b.addEventListener('click', () => { state.range = +b.dataset.range; update(); }));
+$$('.chips button').forEach(b => b.addEventListener('click', () => { state[b.parentElement.dataset.mode] = b.dataset.range; update(); }));
 $$('.info').forEach(b => b.addEventListener('click', () => {
   const hint = document.getElementById(b.getAttribute('aria-controls'));
   hint.hidden = !hint.hidden;
@@ -516,7 +604,7 @@ $$('.info').forEach(b => b.addEventListener('click', () => {
 }));
 
 let raf = 0;
-window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => charts.forEach(c => render(c, false))); });
+window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => charts.forEach(c => render(c))); });
 
 update();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => charts.forEach(c => positionTip(c)));
