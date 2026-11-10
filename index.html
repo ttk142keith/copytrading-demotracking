@@ -115,8 +115,6 @@
 </head>
 <body>
 
-<p class="stage-label">Demo · Thống kê dịch vụ (bản không cuộn ngang) · dữ liệu đến <span id="asOf"></span></p>
-
 <div class="phone">
   <div class="statusbar">
     <span>9:41</span>
@@ -520,7 +518,6 @@ $$('.info').forEach(b => b.addEventListener('click', () => {
 let raf = 0;
 window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => charts.forEach(c => render(c, false))); });
 
-$('#asOf').textContent = dmy(TODAY);
 update();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => charts.forEach(c => positionTip(c)));
 </script>
