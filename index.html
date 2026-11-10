@@ -3,450 +3,526 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Demo — Màn hình Người theo dõi (Leader)</title>
+<title>Demo — Thống kê dịch vụ (Leader)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#14161A;
+    --ink:#1D2026;
     --ink-2:#5B616E;
     --ink-3:#8B909C;
-    --line:#E4E6EA;
-    --line-2:#D3D6DC;
-    --canvas:#F2F3F5;
+    --line:#E9EBEE;
+    --canvas:#E9EBEE;
+    --screen:#F3F4F6;
     --card:#FFFFFF;
-    --tile:#F6F7F9;
-    --blue:#2A6FD6;
-    --blue-bg:#E8F0FB;
-    --red:#D2413F;
-    --red-bg:#FBEBEB;
-    --green:#1F7A45;
-    --amber-bg:#FBF3E2;
-    --amber-ink:#7A5510;
-    --r:10px;
+    --chip:#EEF0F2;
+    --brand:#1A8F45;
+    --chip-on:#CDEEA8;
+    --chip-on-ink:#1D3B12;
+
+    --up:#12A150;      --up-pale:#B7E4C7;   --up-ink:#0E8A43;
+    --down:#F04438;    --down-pale:#FBC9C5; --down-ink:#D92D20;
+    --renew:#DFA922;   --renew-pale:#F3DFA2;--renew-ink:#9A7200;
+    --tip:#2B2D31;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
   body{
     background:var(--canvas);
     font-family:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    color:var(--ink);
-    font-size:14px;
-    line-height:1.5;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:32px 16px 56px;
+    color:var(--ink);font-size:14px;line-height:1.5;
+    display:flex;flex-direction:column;align-items:center;
+    padding:28px 16px 56px;
     font-variant-numeric:tabular-nums;
   }
-  .stage-label{
-    font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;
-    margin:0 0 14px;font-weight:500;
-  }
-  .phone{
-    width:390px;max-width:100%;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:22px;
-    overflow:hidden;
-  }
-  .statusbar{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:9px 20px 3px;font-size:12px;font-weight:500;color:var(--ink);
-  }
+  button{font-family:inherit}
+  .stage-label{font-size:12px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin:0 0 14px;font-weight:500;text-align:center}
+  .phone{width:390px;max-width:100%;background:var(--screen);border:1px solid #D9DCE1;border-radius:22px;overflow:hidden;padding-bottom:16px}
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:9px 20px 3px;font-size:12px;font-weight:500}
   .statusbar .icons{display:flex;gap:5px;color:var(--ink-2)}
-  .nav{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:8px 16px 12px;
+  .title{margin:8px 14px 10px;font-size:18px;font-weight:700;color:var(--brand);letter-spacing:-.01em}
+
+  .card{margin:0 12px;background:var(--card);border-radius:12px}
+  .controls{padding:12px 12px 10px}
+
+  .seg{display:flex;gap:2px;background:var(--chip);border-radius:10px;padding:3px;margin-bottom:10px}
+  .seg button{flex:1;border:0;background:transparent;border-radius:8px;font-size:13px;color:var(--ink-2);padding:7px 0;cursor:pointer;transition:background .12s,color .12s}
+  .seg button[aria-pressed="true"]{background:var(--card);color:var(--brand);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.10)}
+
+  .chips{display:flex;gap:6px}
+  .chips button{flex:1;border:0;background:var(--chip);border-radius:8px;font-size:13px;color:var(--ink);padding:7px 0;cursor:pointer;white-space:nowrap;transition:background .12s}
+  .chips button[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-ink);font-weight:500}
+  .chips[hidden]{display:none}
+  button:focus-visible,.vp:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+  .block{padding:12px 12px 14px;border-top:1px solid var(--line)}
+  .block h2{display:flex;align-items:center;gap:6px;margin:0;font-size:15px;font-weight:600;color:#3A3F48}
+  .info{border:0;background:none;padding:2px;margin:0;color:var(--ink-2);cursor:pointer;display:inline-flex;border-radius:50%}
+  .hint{margin:6px 0 0;padding:8px 10px;background:var(--screen);border-radius:8px;font-size:12px;color:var(--ink-2)}
+  .hint[hidden]{display:none}
+
+  .chart{position:relative;display:flex;align-items:flex-start;margin-top:10px}
+  .yaxis{flex:0 0 42px;display:block}
+  .yaxis text{font-size:11px;fill:var(--ink-3)}
+  .vp{flex:1;min-width:0;overflow:hidden;cursor:crosshair;touch-action:pan-y;border-radius:4px}
+  .band{fill:rgba(16,24,40,.08)}
+  .plot.dense .seg-up,.plot.dense .seg-new{fill:var(--up)}
+  .plot.dense .seg-down{fill:var(--down)}
+  .plot.dense .seg-renew{fill:var(--renew)}
+  .vp.dragging{cursor:grabbing;user-select:none}
+  .vp::-webkit-scrollbar{height:4px}
+  .vp::-webkit-scrollbar-thumb{background:#D5D8DD;border-radius:2px}
+  .plot{display:block}
+  .grid{stroke:#DADDE2;stroke-dasharray:4 4}
+  .zero{stroke:#C4C8CF}
+  .hit{fill:transparent}
+  .slot{cursor:pointer}
+  .slot:hover .hit{fill:rgba(16,24,40,.035)}
+  .slot.sel .hit{fill:rgba(16,24,40,.05)}
+  .xl{font-size:10.5px;fill:var(--ink-3)}
+  .slot.sel .xl{fill:var(--ink);font-weight:600}
+  .seg-up{fill:var(--up-pale)}      .slot.sel .seg-up{fill:var(--up)}
+  .seg-down{fill:var(--down-pale)}  .slot.sel .seg-down{fill:var(--down)}
+  .seg-new{fill:var(--up-pale)}     .slot.sel .seg-new{fill:var(--up)}
+  .seg-renew{fill:var(--renew-pale)}.slot.sel .seg-renew{fill:var(--renew)}
+
+  .tip{position:absolute;z-index:2;background:var(--tip);color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.55;white-space:nowrap;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+  .tip[hidden]{display:none}
+  .tip::after{content:'';position:absolute;left:var(--cx,50%);bottom:-4px;width:10px;height:10px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
+  .tip.side::after{display:none}
+  .tip .t{font-weight:600}
+  .tip .r{display:flex;align-items:center;gap:5px}
+  .tip .r i{width:8px;height:8px;border-radius:2px;flex:none}
+  .tip .r span{color:#D6D8DC}
+  .tip .r b{font-weight:600;margin-left:auto;padding-left:8px}
+
+  .legend{display:flex;justify-content:center;gap:10px;margin-top:8px}
+  .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid currentColor;background:#fff;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:500;cursor:pointer}
+  .pill i{width:8px;height:8px;border-radius:2px;background:var(--sw)}
+  .pill[data-key="up"],.pill[data-key="new"]{color:var(--up-ink);--sw:var(--up)}
+  .pill[data-key="down"]{color:var(--down-ink);--sw:var(--down)}
+  .pill[data-key="renew"]{color:var(--renew-ink);--sw:var(--renew)}
+  .pill[aria-pressed="false"]{color:var(--ink-3);text-decoration:line-through}
+  .pill[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--ink-3)}
+
+  @media (max-width:430px){
+    body{padding:0;background:var(--screen)}
+    .stage-label{display:none}
+    .phone{width:100%;border:0;border-radius:0}
   }
-  .nav .back{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:500}
-  .nav svg{display:block}
-  .body{padding:0 16px 20px;position:relative}
-
-  .seg{
-    display:flex;gap:2px;background:var(--tile);border-radius:var(--r);padding:3px;margin-bottom:8px;
-  }
-  .seg button{
-    flex:1;border:0;background:transparent;border-radius:8px;
-    font-family:inherit;font-size:13px;color:var(--ink-2);padding:7px 0;cursor:pointer;
-    transition:background .12s ease,color .12s ease;
-  }
-  .seg button[aria-selected="true"]{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line)}
-  .seg button:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
-
-  .lbl{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink-2);margin:0 0 3px}
-  .hero{display:flex;align-items:baseline;gap:8px}
-  .hero .num{font-size:52px;font-weight:600;letter-spacing:-.035em;line-height:1.05}
-  .hero .unit{font-size:15px;color:var(--ink-2)}
-  .hero .delta{margin-left:auto;font-size:13px;color:var(--green);font-weight:500}
-  .hero .delta.neg{color:var(--red)}
-
-  .tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .eyebrow{margin:20px 0 7px;font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
-  .tile{background:var(--tile);border-radius:var(--r);padding:10px 10px 11px}
-  .tile .lbl{font-size:11px;margin-bottom:2px;gap:3px}
-  .tile .v{font-size:20px;font-weight:600;letter-spacing:-.02em}
-  .tile .v span{font-size:11px;font-weight:400;color:var(--ink-2);letter-spacing:0}
-
-  .info{
-    border:0;background:transparent;padding:0;margin:0;cursor:pointer;
-    color:var(--ink-3);display:inline-flex;line-height:0;
-  }
-  .info:hover{color:var(--ink-2)}
-  .info:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:50%}
-
-  #caret{position:absolute;z-index:21;width:12px;height:12px;background:var(--card);
-    border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);
-    transform:rotate(45deg);display:none;margin:0;animation:popIn .12s ease-out}
-  #panel{position:absolute;left:16px;right:16px;z-index:20;
-    background:var(--card);border:1px solid var(--line-2);border-radius:var(--r);
-    padding:11px 12px;display:none;margin:0;animation:popIn .12s ease-out;
-    box-shadow:0 10px 28px rgba(20,22,26,.14),0 2px 6px rgba(20,22,26,.06)}
-  @keyframes popIn{from{opacity:0}to{opacity:1}}
-  #panel h4{margin:0 0 4px;font-size:12px;font-weight:600}
-  #panel p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.6}
-
-  .sec{margin-top:24px}
-  .sec-head{display:flex;align-items:center;gap:5px;margin:0 0 3px}
-  .sec-head h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em}
-  .sec-sub{margin:0 0 10px;font-size:11px;color:var(--ink-3)}
-  .chart-cap{margin:0 0 6px;font-size:11.5px;font-weight:500;color:var(--ink-2);display:flex;align-items:center;gap:5px}
-  .chart-cap span{font-weight:400;color:var(--ink-3)}
-  .legend{display:flex;gap:14px;font-size:11px;color:var(--ink-2);margin-bottom:8px}
-  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
-  .legend .dash{width:13px;height:0;border-top:2px dashed var(--ink-3);border-radius:0;vertical-align:4px}
-  .chartbox{position:relative;width:100%;height:190px}
-
-
-  .rowhead{display:flex;align-items:center;justify-content:space-between}
-  .rowhead a{font-size:12px;color:var(--blue);text-decoration:none;font-weight:500}
-  .people{border-top:1px solid var(--line);margin-top:10px}
-  .person{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
-  .person:last-child{border-bottom:0}
-  .av{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex:none}
-  .person .nm{margin:0;font-size:13.5px;font-weight:500}
-  .person .mt{margin:0;font-size:11px;color:var(--ink-2)}
-  .person .grow{flex:1;min-width:0}
-  .person .due{font-size:11px;color:var(--ink-2);flex:none;font-weight:500}
-  .person .due.soon{color:var(--red)}
-
-  .caption{max-width:390px;margin:20px auto 0;font-size:12px;color:var(--ink-3);line-height:1.7}
-  .caption b{color:var(--ink-2);font-weight:500}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
-<p class="stage-label">Demo A · Hai biểu đồ xếp chồng</p>
+<p class="stage-label">Demo · Thống kê dịch vụ (bản không cuộn ngang) · dữ liệu đến <span id="asOf"></span></p>
 
 <div class="phone">
   <div class="statusbar">
     <span>9:41</span>
-    <span class="icons">
-      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="6" rx=".5"/><rect x="9" y="2.5" width="3" height="8.5" rx=".5"/><rect x="13.5" y="0" width="3" height="11" rx=".5"/></svg>
-      <svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x=".5" y=".5" width="17" height="10" rx="2.5" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="12" height="7" rx="1.2" fill="currentColor"/><path d="M19.5 4v3c.9-.4.9-2.6 0-3z" fill="currentColor" opacity=".45"/></svg>
+    <span class="icons" aria-hidden="true">
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".5"/><rect x="4.3" y="5" width="3" height="6" rx=".5"/><rect x="8.6" y="2.5" width="3" height="8.5" rx=".5"/><rect x="12.9" y="0" width="3" height="11" rx=".5"/></svg>
+      <svg width="22" height="11" viewBox="0 0 22 11" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="18" height="10" rx="2.5"/><rect x="2" y="2" width="13" height="7" rx="1.2" fill="currentColor" stroke="none"/><path d="M20.5 3.5v4" stroke-linecap="round"/></svg>
     </span>
   </div>
 
-  <div class="nav">
-    <span class="back">
-      <svg width="9" height="15" viewBox="0 0 9 15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1L1.5 7.5 8 14"/></svg>
-      Người theo dõi tôi
-    </span>
-  </div>
+  <h1 class="title">Thống kê dịch vụ</h1>
 
-  <div class="body">
-
-    <p class="lbl">Đang theo dõi
-      <button class="info" data-info="active" aria-label="Giải thích chỉ số đang theo dõi">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
-      </button>
-    </p>
-    <div class="hero">
-      <span class="num" id="heroNum">248</span>
-      <span class="unit">người</span>
-      <span class="delta" id="heroDelta">+22 so với tháng trước</span>
-    </div>
-
-    <p class="eyebrow">Trong tháng này</p>
-    <div class="tiles">
-      <div class="tile">
-        <p class="lbl">Người mới
-          <button class="info" data-info="moi" aria-label="Giải thích chỉ số người mới">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
-          </button>
-        </p>
-        <p class="v" id="tMoi">31</p>
+  <div class="card">
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Xem theo">
+        <button type="button" data-mode="day" aria-pressed="true">Ngày</button>
+        <button type="button" data-mode="month" aria-pressed="false">Tháng</button>
       </div>
-      <div class="tile">
-        <p class="lbl">Rời đi
-          <button class="info" data-info="roi" aria-label="Giải thích chỉ số rời đi">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
-          </button>
-        </p>
-        <p class="v" id="tRoi">9</p>
-      </div>
-      <div class="tile">
-        <p class="lbl">Theo dõi TB
-          <button class="info" data-info="tb" aria-label="Giải thích chỉ số theo dõi trung bình">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg>
-          </button>
-        </p>
-        <p class="v">7,2 <span>tháng</span></p>
+      <div class="chips" id="chips" role="group" aria-label="Khung thời gian">
+        <button type="button" data-range="1" aria-pressed="true">1 tháng</button>
+        <button type="button" data-range="3" aria-pressed="false">3 tháng</button>
+        <button type="button" data-range="6" aria-pressed="false">6 tháng</button>
+        <button type="button" data-range="12" aria-pressed="false">1 năm</button>
       </div>
     </div>
 
-    <div id="caret"></div>
-    <div id="panel" role="status"><h4 id="pTitle"></h4><p id="pBody"></p></div>
-
-    <div class="sec">
-      <div class="sec-head">
-        <h3>Người theo dõi qua thời gian</h3>
+    <section class="block">
+      <h2>Tài khoản theo dõi
+        <button type="button" class="info" aria-expanded="false" aria-controls="hintFollow" aria-label="Giải thích cách tính">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="5" r=".5" fill="currentColor"/></svg>
+        </button>
+      </h2>
+      <p class="hint" id="hintFollow" hidden>Mỗi cột là biến động ròng số tài khoản (TK) theo dõi trong kỳ: TK theo dõi mới trừ TK hủy theo dõi, gồm cả TK bị hủy do không đủ số dư gia hạn. Gia hạn không làm thay đổi số TK.</p>
+      <div class="chart" id="chartFollow">
+        <svg class="yaxis" aria-hidden="true"></svg>
+        <div class="vp" tabindex="0" role="group" aria-label="Biểu đồ cột biến động tài khoản theo dõi. Dùng phím mũi tên trái phải để chọn cột."><svg class="plot"></svg></div>
+        <div class="tip" role="status" hidden></div>
       </div>
-      <div class="seg" role="tablist" aria-label="Khoảng thời gian">
-        <button role="tab" data-mode="ngay" aria-selected="false">Ngày</button>
-        <button role="tab" data-mode="tuan" aria-selected="false">Tuần</button>
-        <button role="tab" data-mode="thang" aria-selected="true">Tháng</button>
-      </div>
-
-      <p class="sec-sub" id="chartSub">6 tháng gần nhất</p>
-
-      <p class="chart-cap">Tổng đang theo dõi <span id="capTotal">cuối mỗi tháng</span><button class="info" data-info="total" aria-label="Giải thích biểu đồ tổng đang theo dõi"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg></button></p>
-      <div class="chartbox" style="height:118px">
-        <canvas id="chartTotal" role="img" aria-label="Biểu đồ đường tổng số người đang theo dõi ở cuối mỗi kỳ">Tổng số người đang theo dõi ở cuối mỗi kỳ.</canvas>
-      </div>
-
-      <p class="chart-cap" style="margin-top:14px">Ai vào, ai rời trong kỳ<button class="info" data-info="flow" aria-label="Giải thích biểu đồ ai vào ai rời"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.2v4M8 4.9v.1" stroke-linecap="round"/></svg></button></p>
       <div class="legend">
-        <span><i style="background:#2A6FD6"></i>Người mới</span>
-        <span><i style="background:#D2413F"></i>Rời đi</span>
-        <span><i class="dash"></i>Tăng ròng</span>
+        <button type="button" class="pill" data-key="up" aria-pressed="true"><i></i>Số lượng tăng</button>
+        <button type="button" class="pill" data-key="down" aria-pressed="true"><i></i>Số lượng giảm</button>
       </div>
-      <div class="chartbox" style="height:150px">
-        <canvas id="chart" role="img" aria-label="Biểu đồ cột số người theo dõi mới và số người rời đi theo từng kỳ">Số người mới và số người rời đi theo kỳ.</canvas>
-      </div>
-    </div>
+    </section>
 
-    <div class="sec">
-      <div class="rowhead">
-        <h3 style="margin:0;font-size:15px;font-weight:600;letter-spacing:-.01em">Người theo dõi</h3>
-        <a href="#" onclick="return false">Xem tất cả (248)</a>
+    <section class="block">
+      <h2>Phí theo dõi
+        <button type="button" class="info" aria-expanded="false" aria-controls="hintFee" aria-label="Giải thích cách tính">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.2v4" stroke-linecap="round"/><circle cx="8" cy="5" r=".5" fill="currentColor"/></svg>
+        </button>
+      </h2>
+      <p class="hint" id="hintFee" hidden>Phí đăng ký mới thu khi có TK bắt đầu theo dõi. Phí gia hạn thu vào ngày giao dịch thứ 2 hằng tháng. Mức phí demo: 100,000 đ/TK/tháng. Đơn vị trục: triệu đồng (tr).</p>
+      <div class="chart" id="chartFee">
+        <svg class="yaxis" aria-hidden="true"></svg>
+        <div class="vp" tabindex="0" role="group" aria-label="Biểu đồ cột phí theo dõi. Dùng phím mũi tên trái phải để chọn cột."><svg class="plot"></svg></div>
+        <div class="tip" role="status" hidden></div>
       </div>
-      <p class="sec-sub" style="margin-top:2px">Sắp đến hạn gia hạn trong 7 ngày</p>
-      <div class="people">
-        <div class="person">
-          <div class="av">NH</div>
-          <div class="grow"><p class="nm">Nguyễn Văn Hùng</p><p class="mt">Đã theo dõi 4 tháng</p></div>
-          <span class="due soon">Còn 2 ngày</span>
-        </div>
-        <div class="person">
-          <div class="av">TM</div>
-          <div class="grow"><p class="nm">Trần Thị Mai</p><p class="mt">Đã theo dõi 11 tháng</p></div>
-          <span class="due">Còn 6 ngày</span>
-        </div>
-        <div class="person">
-          <div class="av">LĐ</div>
-          <div class="grow"><p class="nm">Lê Quốc Đạt</p><p class="mt">Đã theo dõi 1 tháng</p></div>
-          <span class="due">Còn 7 ngày</span>
-        </div>
+      <div class="legend">
+        <button type="button" class="pill" data-key="new" aria-pressed="true"><i></i>Phí đăng ký mới</button>
+        <button type="button" class="pill" data-key="renew" aria-pressed="true"><i></i>Phí gia hạn</button>
       </div>
-    </div>
-
+    </section>
   </div>
 </div>
 
-<p class="caption">
-  <b>Cách xem demo:</b> khối số phía trên luôn là tình hình <b>tháng này</b> — không đổi theo bộ chọn kỳ. Bộ chọn Ngày / Tuần / Tháng nằm ngay trên biểu đồ và chỉ đổi biểu đồ. Chạm vào biểu đồ để xem chi tiết từng kỳ, bấm ⓘ ở bất kỳ chỉ số nào để xem giải thích. Dữ liệu mẫu, giá gói giả định 200.000đ/tháng, phí nền tảng 20%.
-</p>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const INFO = {
-  active:['Đang theo dõi','Số người đang trả phí và xem được thông tin của bạn ngay lúc này. Người đã hết hạn mà không gia hạn thì không còn được tính.'],
-  moi:['Người mới','Số người bắt đầu trả phí theo dõi bạn trong tháng này. Người từng rời đi rồi quay lại vẫn được tính là người mới.'],
-  roi:['Rời đi','Số người ngừng theo dõi trong tháng này — gồm cả người chủ động hủy và người hết hạn mà không gia hạn.'],
-  tb:['Theo dõi trung bình','Một người gắn bó với bạn được bao lâu trước khi rời đi, tính trên những người đã rời trong 12 tháng qua. Số càng cao nghĩa là bạn giữ chân càng tốt.'],
-  total:['Tổng đang theo dõi','Số người đang trả phí ở cuối mỗi kỳ. Đường đi lên là kỳ đó bạn có thêm người, đi xuống là mất người. Chạm vào đường để xem số người kèm số tiền tương ứng.'],
-  flow:['Ai vào, ai rời trong kỳ','Cột xanh phía trên vạch 0 là số người mới vào, cột đỏ phía dưới là số người rời đi trong kỳ đó. Đường nét đứt là chênh lệch giữa hai bên: nằm trên vạch 0 nghĩa là kỳ đó bạn tăng người theo dõi, dưới vạch 0 là giảm.']
-};
+/* ===== Demo data: [ngày, NewFollower, Renew, UnFollow, UnSubscription] =====
+   05/05/2026–22/07/2026 lấy nguyên từ file Excel, phần còn lại là dữ liệu sinh thêm.
+   Bản đầy đủ: smartCopy-demo-data-12-thang.csv */
+const RAW = [
+  ["2025-11-01",0,0,0,0],["2025-11-02",0,0,0,0],["2025-11-03",0,0,0,0],["2025-11-04",0,0,0,0],["2025-11-05",0,0,0,0],
+  ["2025-11-06",2,0,0,0],["2025-11-07",0,0,0,0],["2025-11-08",0,0,0,0],["2025-11-09",0,0,0,0],["2025-11-10",1,0,0,0],
+  ["2025-11-11",0,0,0,0],["2025-11-12",4,0,0,0],["2025-11-13",0,0,0,0],["2025-11-14",0,0,0,0],["2025-11-15",1,0,0,0],
+  ["2025-11-16",0,0,0,0],["2025-11-17",0,0,0,0],["2025-11-18",0,0,3,0],["2025-11-19",0,0,0,0],["2025-11-20",1,0,0,0],
+  ["2025-11-21",0,0,0,0],["2025-11-22",0,0,0,0],["2025-11-23",0,0,0,0],["2025-11-24",1,0,0,0],["2025-11-25",0,0,0,0],
+  ["2025-11-26",2,0,0,0],["2025-11-27",0,0,0,0],["2025-11-28",3,0,0,0],["2025-11-29",0,0,0,0],["2025-11-30",1,0,0,0],
+  ["2025-12-01",0,0,0,0],["2025-12-02",0,12,0,1],["2025-12-03",0,0,0,0],["2025-12-04",0,0,2,0],["2025-12-05",0,0,2,0],
+  ["2025-12-06",0,0,0,0],["2025-12-07",0,0,0,0],["2025-12-08",4,0,0,0],["2025-12-09",0,0,0,0],["2025-12-10",0,0,1,0],
+  ["2025-12-11",0,0,0,0],["2025-12-12",0,0,0,0],["2025-12-13",3,0,0,0],["2025-12-14",0,0,0,0],["2025-12-15",0,0,0,0],
+  ["2025-12-16",0,0,0,0],["2025-12-17",1,0,0,0],["2025-12-18",0,0,0,0],["2025-12-19",0,0,0,0],["2025-12-20",0,0,0,0],
+  ["2025-12-21",2,0,2,0],["2025-12-22",0,0,0,0],["2025-12-23",1,0,0,0],["2025-12-24",0,0,0,0],["2025-12-25",1,0,0,0],
+  ["2025-12-26",0,0,0,0],["2025-12-27",0,0,0,0],["2025-12-28",0,0,0,0],["2025-12-29",0,0,0,0],["2025-12-30",0,0,0,0],
+  ["2025-12-31",0,0,1,0],["2026-01-01",0,0,0,0],["2026-01-02",0,0,0,0],["2026-01-03",0,0,0,0],["2026-01-04",0,0,0,0],
+  ["2026-01-05",1,0,0,0],["2026-01-06",1,14,0,3],["2026-01-07",0,0,0,0],["2026-01-08",0,0,0,0],["2026-01-09",0,0,0,0],
+  ["2026-01-10",1,0,2,0],["2026-01-11",0,0,1,0],["2026-01-12",0,0,0,0],["2026-01-13",0,0,0,0],["2026-01-14",0,0,0,0],
+  ["2026-01-15",0,0,0,0],["2026-01-16",0,0,0,0],["2026-01-17",0,0,0,0],["2026-01-18",0,0,0,0],["2026-01-19",0,0,0,0],
+  ["2026-01-20",0,0,1,0],["2026-01-21",0,0,0,0],["2026-01-22",1,0,0,0],["2026-01-23",0,0,0,0],["2026-01-24",0,0,0,0],
+  ["2026-01-25",0,0,0,0],["2026-01-26",0,0,0,0],["2026-01-27",0,0,0,0],["2026-01-28",1,0,0,0],["2026-01-29",0,0,0,0],
+  ["2026-01-30",0,0,1,0],["2026-01-31",1,0,0,0],["2026-02-01",3,0,0,0],["2026-02-02",0,0,0,0],["2026-02-03",0,15,0,2],
+  ["2026-02-04",0,0,1,0],["2026-02-05",0,0,0,0],["2026-02-06",0,0,0,0],["2026-02-07",1,0,0,0],["2026-02-08",0,0,0,0],
+  ["2026-02-09",0,0,0,0],["2026-02-10",1,0,0,0],["2026-02-11",0,0,0,0],["2026-02-12",3,0,0,0],["2026-02-13",0,0,0,0],
+  ["2026-02-14",0,0,0,0],["2026-02-15",0,0,0,0],["2026-02-16",0,0,0,0],["2026-02-17",1,0,1,0],["2026-02-18",1,0,0,0],
+  ["2026-02-19",0,0,0,0],["2026-02-20",0,0,0,0],["2026-02-21",0,0,0,0],["2026-02-22",0,0,0,0],["2026-02-23",0,0,0,0],
+  ["2026-02-24",0,0,0,0],["2026-02-25",0,0,0,0],["2026-02-26",0,0,0,0],["2026-02-27",0,0,0,0],["2026-02-28",0,0,0,0],
+  ["2026-03-01",0,0,0,0],["2026-03-02",2,0,1,0],["2026-03-03",0,19,0,2],["2026-03-04",0,0,0,0],["2026-03-05",0,0,0,0],
+  ["2026-03-06",0,0,0,0],["2026-03-07",0,0,0,0],["2026-03-08",0,0,0,0],["2026-03-09",0,0,0,0],["2026-03-10",1,0,0,0],
+  ["2026-03-11",0,0,0,0],["2026-03-12",0,0,0,0],["2026-03-13",1,0,0,0],["2026-03-14",0,0,0,0],["2026-03-15",0,0,0,0],
+  ["2026-03-16",0,0,0,0],["2026-03-17",1,0,1,0],["2026-03-18",1,0,0,0],["2026-03-19",0,0,0,0],["2026-03-20",0,0,0,0],
+  ["2026-03-21",1,0,0,0],["2026-03-22",2,0,0,0],["2026-03-23",0,0,0,0],["2026-03-24",0,0,0,0],["2026-03-25",0,0,0,0],
+  ["2026-03-26",0,0,0,0],["2026-03-27",0,0,0,0],["2026-03-28",0,0,0,0],["2026-03-29",0,0,0,0],["2026-03-30",0,0,0,0],
+  ["2026-03-31",0,0,0,0],["2026-04-01",0,0,0,0],["2026-04-02",0,22,0,3],["2026-04-03",0,0,0,0],["2026-04-04",0,0,0,0],
+  ["2026-04-05",1,0,0,0],["2026-04-06",1,0,1,0],["2026-04-07",0,0,0,0],["2026-04-08",0,0,0,0],["2026-04-09",0,0,0,0],
+  ["2026-04-10",3,0,0,0],["2026-04-11",1,0,0,0],["2026-04-12",0,0,1,0],["2026-04-13",0,0,1,0],["2026-04-14",0,0,0,0],
+  ["2026-04-15",0,0,0,0],["2026-04-16",0,0,0,0],["2026-04-17",0,0,0,0],["2026-04-18",2,0,0,0],["2026-04-19",0,0,0,0],
+  ["2026-04-20",0,0,0,0],["2026-04-21",0,0,0,0],["2026-04-22",2,0,1,0],["2026-04-23",0,0,0,0],["2026-04-24",0,0,0,0],
+  ["2026-04-25",0,0,0,0],["2026-04-26",0,0,1,0],["2026-04-27",1,0,0,0],["2026-04-28",0,0,0,0],["2026-04-29",0,0,0,0],
+  ["2026-04-30",0,0,0,0],["2026-05-01",0,0,0,0],["2026-05-02",2,0,0,0],["2026-05-03",0,0,0,0],["2026-05-04",0,0,0,0],
+  ["2026-05-05",0,30,0,0],["2026-05-06",0,0,0,0],["2026-05-07",0,0,1,0],["2026-05-08",0,0,0,0],["2026-05-09",0,0,0,0],
+  ["2026-05-10",1,0,0,0],["2026-05-11",0,0,0,0],["2026-05-12",1,0,0,0],["2026-05-13",0,0,0,0],["2026-05-14",2,0,0,0],
+  ["2026-05-15",0,0,0,0],["2026-05-16",0,0,2,0],["2026-05-17",0,0,0,0],["2026-05-18",0,0,0,0],["2026-05-19",2,0,0,0],
+  ["2026-05-20",0,0,0,0],["2026-05-21",0,0,0,0],["2026-05-22",0,0,0,0],["2026-05-23",0,0,5,0],["2026-05-24",3,0,0,0],
+  ["2026-05-25",0,0,0,0],["2026-05-26",0,0,0,0],["2026-05-27",1,0,5,0],["2026-05-28",2,0,0,0],["2026-05-29",0,0,0,0],
+  ["2026-05-30",0,0,0,0],["2026-05-31",0,0,0,0],["2026-06-01",3,0,0,0],["2026-06-02",5,27,13,5],["2026-06-03",0,0,0,0],
+  ["2026-06-04",0,0,0,0],["2026-06-05",2,0,0,0],["2026-06-06",0,0,0,0],["2026-06-07",1,0,0,0],["2026-06-08",0,0,0,0],
+  ["2026-06-09",0,0,3,0],["2026-06-10",0,0,0,0],["2026-06-11",1,0,0,0],["2026-06-12",0,0,0,0],["2026-06-13",1,0,0,0],
+  ["2026-06-14",0,0,0,0],["2026-06-15",0,0,0,0],["2026-06-16",0,0,2,0],["2026-06-17",0,0,0,0],["2026-06-18",1,0,0,0],
+  ["2026-06-19",0,0,0,0],["2026-06-20",1,0,0,0],["2026-06-21",1,0,0,0],["2026-06-22",0,0,0,0],["2026-06-23",0,0,0,0],
+  ["2026-06-24",0,0,0,0],["2026-06-25",1,0,0,0],["2026-06-26",0,0,0,0],["2026-06-27",0,0,0,0],["2026-06-28",0,0,0,0],
+  ["2026-06-29",0,0,0,0],["2026-06-30",0,0,0,0],["2026-07-01",0,0,0,0],["2026-07-02",0,29,5,7],["2026-07-03",0,0,0,0],
+  ["2026-07-04",0,0,0,0],["2026-07-05",0,0,0,0],["2026-07-06",0,0,0,0],["2026-07-07",0,0,0,0],["2026-07-08",0,0,0,0],
+  ["2026-07-09",0,0,2,0],["2026-07-10",1,0,0,0],["2026-07-11",0,0,0,0],["2026-07-12",0,0,0,0],["2026-07-13",0,0,0,0],
+  ["2026-07-14",0,0,2,0],["2026-07-15",0,0,0,0],["2026-07-16",5,0,0,0],["2026-07-17",0,0,0,0],["2026-07-18",0,0,1,0],
+  ["2026-07-19",2,0,0,0],["2026-07-20",0,0,0,0],["2026-07-21",0,0,0,0],["2026-07-22",0,0,0,0],["2026-07-23",0,0,0,0],
+  ["2026-07-24",3,0,0,0],["2026-07-25",0,0,0,0],["2026-07-26",0,0,3,0],["2026-07-27",0,0,0,0],["2026-07-28",0,0,0,0],
+  ["2026-07-29",0,0,0,0],["2026-07-30",0,0,0,0],["2026-07-31",2,0,0,0],["2026-08-01",2,0,0,0],["2026-08-02",0,0,1,0],
+  ["2026-08-03",0,0,0,0],["2026-08-04",0,15,0,2],["2026-08-05",0,0,0,0],["2026-08-06",1,0,0,0],["2026-08-07",1,0,0,0],
+  ["2026-08-08",0,0,0,0],["2026-08-09",0,0,0,0],["2026-08-10",1,0,0,0],["2026-08-11",2,0,0,0],["2026-08-12",0,0,0,0],
+  ["2026-08-13",0,0,0,0],["2026-08-14",4,0,0,0],["2026-08-15",0,0,0,0],["2026-08-16",2,0,0,0],["2026-08-17",0,0,0,0],
+  ["2026-08-18",0,0,0,0],["2026-08-19",0,0,0,0],["2026-08-20",0,0,0,0],["2026-08-21",2,0,0,0],["2026-08-22",4,0,0,0],
+  ["2026-08-23",0,0,0,0],["2026-08-24",0,0,0,0],["2026-08-25",1,0,0,0],["2026-08-26",0,0,0,0],["2026-08-27",0,0,0,0],
+  ["2026-08-28",0,0,0,0],["2026-08-29",4,0,0,0],["2026-08-30",0,0,1,0],["2026-08-31",0,0,0,0],["2026-09-01",1,0,0,0],
+  ["2026-09-02",3,0,0,0],["2026-09-03",0,0,0,0],["2026-09-04",0,37,0,3],["2026-09-05",1,0,0,0],["2026-09-06",6,0,0,0],
+  ["2026-09-07",0,0,0,0],["2026-09-08",0,0,0,0],["2026-09-09",1,0,0,0],["2026-09-10",1,0,0,0],["2026-09-11",3,0,0,0],
+  ["2026-09-12",0,0,3,0],["2026-09-13",0,0,2,0],["2026-09-14",1,0,0,0],["2026-09-15",0,0,0,0],["2026-09-16",4,0,0,0],
+  ["2026-09-17",0,0,0,0],["2026-09-18",2,0,0,0],["2026-09-19",4,0,0,0],["2026-09-20",0,0,0,0],["2026-09-21",1,0,2,0],
+  ["2026-09-22",0,0,0,0],["2026-09-23",0,0,2,0],["2026-09-24",0,0,0,0],["2026-09-25",1,0,0,0],["2026-09-26",0,0,0,0],
+  ["2026-09-27",0,0,0,0],["2026-09-28",0,0,0,0],["2026-09-29",0,0,0,0],["2026-09-30",1,0,0,0],["2026-10-01",0,0,0,0],
+  ["2026-10-02",0,48,0,6],["2026-10-03",0,0,0,0],["2026-10-04",2,0,0,0],["2026-10-05",0,0,0,0],["2026-10-06",0,0,0,0],
+  ["2026-10-07",0,0,2,0],["2026-10-08",0,0,0,0],["2026-10-09",0,0,0,0],["2026-10-10",2,0,0,0],["2026-10-11",0,0,0,0],
+  ["2026-10-12",3,0,1,0],["2026-10-13",0,0,0,0],["2026-10-14",0,0,0,0],["2026-10-15",1,0,0,0],["2026-10-16",0,0,3,0],
+  ["2026-10-17",1,0,0,0],["2026-10-18",0,0,0,0],["2026-10-19",0,0,0,0],["2026-10-20",2,0,0,0],["2026-10-21",3,0,0,0],
+  ["2026-10-22",0,0,0,0],["2026-10-23",0,0,0,0],["2026-10-24",6,0,0,0],["2026-10-25",2,0,1,0],["2026-10-26",1,0,1,0],
+  ["2026-10-27",3,0,0,0],["2026-10-28",2,0,0,0],["2026-10-29",0,0,1,0],["2026-10-30",1,0,1,0],["2026-10-31",1,0,0,0],
+  ["2026-11-01",3,0,0,0],["2026-11-02",2,0,0,0],["2026-11-03",0,67,0,6],["2026-11-04",0,0,0,0],["2026-11-05",0,0,0,0],
+  ["2026-11-06",0,0,0,0],["2026-11-07",0,0,0,0],["2026-11-08",0,0,0,0],["2026-11-09",0,0,0,0],["2026-11-10",1,0,0,0]
+];
+const FEE = 100000; // đ / TK / tháng
 
-const DATA = {
-  thang:{
-    labels:['T2','T3','T4','T5','T6','T7'],
-    moi:[18,24,15,29,26,31],
-    roi:[5,7,12,6,8,9],
-    sub:'6 tháng gần nhất',
-    start:152,
-    cap:'cuối mỗi tháng',
-    deltaLabel:'so với tháng trước'
-  },
-  tuan:{
-    labels:['27/4','4/5','11/5','18/5','25/5','1/6','8/6','15/6','22/6','29/6','6/7','13/7'],
-    moi:[6,8,5,9,7,6,8,10,5,7,9,6],
-    roi:[2,1,3,2,1,2,0,3,2,1,4,2],
-    sub:'12 tuần gần nhất',
-    start:185,
-    cap:'cuối mỗi tuần',
-    deltaLabel:'so với tuần trước'
-  },
-  ngay:{
-    labels:[],
-    moi:[1,0,2,1,0,0,3,1,1,0,2,0,1,4,2,0,1,1,0,2,1,0,3,1,0,1,2,0,0,1],
-    roi:[0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,1,0],
-    sub:'30 ngày gần nhất',
-    start:226,
-    cap:'cuối mỗi ngày',
-    deltaLabel:'so với hôm qua'
-  }
-};
-(function(){
-  const end = new Date(2026,6,15);
-  for(let i=29;i>=0;i--){
-    const d = new Date(end); d.setDate(end.getDate()-i);
-    DATA.ngay.labels.push(d.getDate()+'/'+(d.getMonth()+1));
-  }
-})();
+/* ---------- helpers ---------- */
+const pad2 = n => String(n).padStart(2, '0');
+const fmt = n => Math.abs(n).toLocaleString('en-US');
+const signed = n => (n > 0 ? '+' : n < 0 ? '−' : '') + fmt(n);
+const fmtAxisInt = v => (v < 0 ? '−' : '') + fmt(v);
+const fmtAxisMoney = v => v === 0 ? '0' : (v / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + 'tr';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-const fmt = n => n.toLocaleString('vi-VN');
-let chart, chartTotal, mode='thang', openKey=null;
-const PRICE=200000, FEE=.2;
-const money = n => (n*PRICE*(1-FEE)/1e6).toFixed(1).replace('.',',')+' tr';
-const AXIS_W = 34;
-
-const panel=document.getElementById('panel'), caret=document.getElementById('caret');
-const pTitle=document.getElementById('pTitle'), pBody=document.getElementById('pBody');
-
-// Chú thích là lớp nổi: định vị tuyệt đối trong .body nên không đẩy nội dung bên dưới.
-function place(btn){
-  const host = panel.parentElement.getBoundingClientRect();
-  const r = btn.getBoundingClientRect();
-  const top = r.bottom - host.top + 9;
-  panel.style.top = Math.round(top) + 'px';
-  caret.style.top = Math.round(top - 6) + 'px';
-  const x = Math.max(22, Math.min(host.width - 34, r.left - host.left + r.width/2 - 6));
-  caret.style.left = Math.round(x) + 'px';
-}
-function closePop(){
-  panel.style.display='none'; caret.style.display='none'; openKey=null;
-}
-document.querySelectorAll('.info').forEach(btn=>{
-  btn.addEventListener('click',e=>{
-    e.stopPropagation();
-    const k=btn.dataset.info;
-    if(openKey===k){closePop();return;}
-    openKey=k;
-    pTitle.textContent=INFO[k][0];
-    pBody.textContent=INFO[k][1];
-    panel.style.display='block';caret.style.display='block';
-    place(btn);
-  });
+/* ---------- data model ---------- */
+let running = 0;
+const DAYS = RAW.map(([ds, n, r, u, s]) => {
+  const [y, m, dd] = ds.split('-').map(Number);
+  const net = n - u - s;               // gia hạn không làm thay đổi số TK
+  running += net;
+  return { d: new Date(y, m - 1, dd), y, m, dd, net, total: running, feeNew: n * FEE, feeRenew: r * FEE };
 });
-document.addEventListener('click',e=>{
-  if(openKey && !e.target.closest('#panel')) closePop();
-});
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && openKey) closePop(); });
-window.addEventListener('resize',()=>{ if(openKey) closePop(); });
+const TODAY = DAYS[DAYS.length - 1];
+const dmy = x => `${pad2(x.dd)}/${pad2(x.m)}/${x.y}`;
 
-// Khối số trên cùng luôn là tháng mới nhất — không đổi theo bộ chọn kỳ.
-function renderHeader(){
-  const d=DATA.thang, i=d.moi.length-1;
-  document.getElementById('tMoi').textContent=fmt(d.moi[i]);
-  document.getElementById('tRoi').textContent=fmt(d.roi[i]);
-  const net=d.moi[i]-d.roi[i], el=document.getElementById('heroDelta');
-  el.className='delta'+(net<0?' neg':'');
-  el.textContent = net===0 ? 'Không đổi so với tháng trước'
-                           : (net>0?'+':'')+fmt(net)+' so với tháng trước';
+function dayBuckets(months) {
+  const t = TODAY.d;
+  const from = new Date(t.getFullYear(), t.getMonth() - months, t.getDate() + 1);
+  return DAYS.filter(x => x.d >= from).map(x => ({
+    label: `${pad2(x.dd)}/${pad2(x.m)}`, title: dmy(x),
+    net: x.net, total: x.total, feeNew: x.feeNew, feeRenew: x.feeRenew
+  }));
 }
 
-function render(){
-  const d=DATA[mode];
-  document.getElementById('chartSub').textContent=d.sub;
+function monthBuckets() {
+  const map = new Map();
+  for (const x of DAYS) {
+    const k = x.y * 12 + x.m;
+    let b = map.get(k);
+    if (!b) {
+      b = { label: `T${x.m}/${String(x.y).slice(2)}`, title: `Tháng ${pad2(x.m)}/${x.y}`, y: x.y, m: x.m, net: 0, total: 0, feeNew: 0, feeRenew: 0 };
+      map.set(k, b);
+    }
+    b.net += x.net; b.total = x.total; b.feeNew += x.feeNew; b.feeRenew += x.feeRenew;
+  }
+  const list = [...map.values()].slice(-12);
+  const last = list[list.length - 1];
+  const monthEnd = new Date(TODAY.y, TODAY.m, 0).getDate();
+  if (TODAY.dd < monthEnd) last.title += ` (đến ${pad2(TODAY.dd)}/${pad2(TODAY.m)})`;
+  return list;
+}
 
-  document.getElementById('capTotal').textContent=d.cap;
+/* ---------- chart ---------- */
+const AW = 42, PT = 14, PH = 200, LB = 46, H = PT + PH + LB, SLOT = 24, PADL = 8;
 
-  let run=d.start;
-  const total=d.moi.map((v,i)=>{run+=v-d.roi[i];return run;});
-  const net=d.moi.map((v,i)=>v-d.roi[i]);
+function niceScale(min, max, integer) {
+  if (min === 0 && max === 0) max = integer ? 4 : 400000;
+  const raw = (max - min) / 5;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const f = raw / pow;
+  const cands = integer ? [1, 2, 5, 10] : [1, 2, 2.5, 5, 10];
+  let step = cands.find(c => f <= c) * pow;
+  if (integer) step = Math.max(1, Math.round(step));
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+  const ticks = [];
+  for (let i = 0; i <= Math.round((hi - lo) / step); i++) ticks.push(lo + i * step);
+  return { lo, hi, ticks };
+}
 
-  const tick={color:'#8B909C',font:{size:10,family:"'Be Vietnam Pro'"}};
-  const tip={
-    backgroundColor:'#14161A',padding:10,cornerRadius:8,boxWidth:8,boxHeight:8,boxPadding:3,
-    titleFont:{family:"'Be Vietnam Pro'",size:12,weight:'600'},
-    bodyFont:{family:"'Be Vietnam Pro'",size:12}
+function barPath(x, y, w, h, r, dir) { // dir: 1 = bo đầu trên, -1 = bo đầu dưới, 0 = vuông
+  r = Math.min(r, w / 2, h);
+  if (dir > 0) return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  if (dir < 0) return `M${x},${y}V${y + h - r}Q${x},${y + h} ${x + r},${y + h}H${x + w - r}Q${x + w},${y + h} ${x + w},${y + h - r}V${y}Z`;
+  return `M${x},${y}h${w}v${h}h${-w}Z`;
+}
+
+const charts = [];
+
+function makeChart(id, cfg) {
+  const root = document.getElementById(id);
+  const c = {
+    root, cfg, yaxis: $('.yaxis', root), vp: $('.vp', root), plot: $('.plot', root), tip: $('.tip', root),
+    on: Object.fromEntries(cfg.keys.map(k => [k, true])), buckets: [], sums: [], geom: [], sel: -1, fit: false, barW: 14
   };
+  charts.push(c);
 
-  if(chartTotal) chartTotal.destroy();
-  chartTotal=new Chart(document.getElementById('chartTotal'),{
-    type:'line',
-    data:{labels:d.labels,datasets:[{
-      label:'Đang theo dõi',data:total,
-      borderColor:'#14161A',borderWidth:2,tension:.3,
-      fill:true,backgroundColor:'rgba(42,111,214,.09)',
-      pointRadius:0,pointHoverRadius:4,pointHoverBackgroundColor:'#14161A'
-    }]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      layout:{padding:{top:4}},
-      scales:{
-        x:{grid:{display:false},border:{display:false},ticks:{display:false}},
-        y:{grid:{color:'#EDEFF2'},border:{display:false},ticks:{...tick,maxTicksLimit:4},
-           afterFit:s=>{s.width=AXIS_W}}
-      },
-      plugins:{
-        legend:{display:false},
-        tooltip:{...tip,displayColors:false,callbacks:{
-          label:c=>' '+fmt(c.parsed.y)+' người  ·  ≈ '+money(c.parsed.y)+' thực nhận'
-        }}
-      }
-    }
+  // chọn cột: chạm, hoặc rê ngón tay / chuột ngang biểu đồ để dò từng cột (cột hẹp nên không bắt chạm trúng)
+  let down = false;
+  const pick = e => {
+    const n = c.buckets.length;
+    const x = e.clientX - c.vp.getBoundingClientRect().left;
+    const i = Math.min(n - 1, Math.max(0, Math.floor((x - PADL) / c.slotW)));
+    if (i !== c.sel) { c.sel = i; applySel(c); }
+  };
+  c.vp.addEventListener('pointerdown', e => { down = true; pick(e); });
+  c.vp.addEventListener('pointermove', e => { if (down || e.pointerType === 'mouse') pick(e); });
+  window.addEventListener('pointerup', () => { down = false; });
+  window.addEventListener('pointercancel', () => { down = false; });
+  c.vp.addEventListener('keydown', e => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const n = c.buckets.length;
+    c.sel = c.sel < 0 ? n - 1 : Math.min(n - 1, Math.max(0, c.sel + (e.key === 'ArrowRight' ? 1 : -1)));
+    applySel(c);
   });
-
-  if(chart) chart.destroy();
-  chart=new Chart(document.getElementById('chart'),{
-    data:{
-      labels:d.labels,
-      datasets:[
-        {type:'bar',label:'Người mới',data:d.moi,backgroundColor:'#2A6FD6',borderRadius:{topLeft:3,topRight:3},maxBarThickness:mode==='ngay'?7:16},
-        {type:'bar',label:'Rời đi',data:d.roi.map(v=>-v),backgroundColor:'#D2413F',borderRadius:{bottomLeft:3,bottomRight:3},maxBarThickness:mode==='ngay'?7:16},
-        {type:'line',label:'Tăng ròng',data:net,stack:'net',
-         borderColor:'#5B616E',borderWidth:1.5,borderDash:[4,3],tension:.3,
-         pointRadius:0,pointHoverRadius:3.5,pointHoverBackgroundColor:'#5B616E'}
-      ]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      scales:{
-        x:{stacked:true,grid:{display:false},border:{color:'#D3D6DC'},
-           ticks:{...tick,autoSkip:mode==='ngay',maxRotation:0,maxTicksLimit:mode==='ngay'?6:12}},
-        y:{stacked:true,grid:{color:'#EDEFF2'},border:{display:false},
-           ticks:{...tick,callback:v=>Math.abs(v)},afterFit:s=>{s.width=AXIS_W}}
-      },
-      plugins:{
-        legend:{display:false},
-        tooltip:{...tip,displayColors:true,callbacks:{
-          label:c=>c.dataset.type==='line'
-            ? '  Tăng ròng: '+(c.parsed.y>0?'+':'')+fmt(c.parsed.y)+' người'
-            : '  '+c.dataset.label+': '+fmt(Math.abs(c.parsed.y))+' người'
-        }}
-      }
-    }
-  });
+  // legend bật/tắt chuỗi
+  $$('.pill', root.parentElement).forEach(p => p.addEventListener('click', () => {
+    const k = p.dataset.key;
+    if (c.on[k] && cfg.keys.filter(x => c.on[x]).length === 1) return; // luôn giữ ít nhất 1 chuỗi
+    c.on[k] = !c.on[k];
+    p.setAttribute('aria-pressed', c.on[k]);
+    render(c, true);
+  }));
+  return c;
 }
 
-document.querySelectorAll('.seg button').forEach(b=>{
-  b.addEventListener('click',()=>{
-    document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-selected','false'));
-    b.setAttribute('aria-selected','true');
-    mode=b.dataset.mode;
-    closePop();
-    render();
+function render(c, keepScroll) {
+  const { cfg, buckets } = c;
+  const n = buckets.length;
+  const vpW = c.vp.clientWidth;
+  // mọi khung thời gian đều dồn vừa bề ngang màn hình: cột hẹp dần khi số cột tăng
+  const slotW = (vpW - PADL) / n;
+  const W = vpW;
+  const barW = slotW >= 10 ? Math.round(Math.min(16, slotW * 0.6)) : Math.max(1.5, slotW - 1);
+  const dense = slotW < 6;
+  c.slotW = slotW; c.barW = barW;
+  // nhãn trục thưa dần: mỗi cột → cách 2 cột → mỗi tuần → ngày đầu tháng
+  const showLabel = i => n <= 16 ? true
+    : n <= 35 ? (n - 1 - i) % 2 === 0
+    : n <= 100 ? (n - 1 - i) % 7 === 0
+    : buckets[i].label.startsWith('01/');
+
+  const stacks = buckets.map(b => cfg.segs(b).filter(s => c.on[s.key] && s.value !== 0));
+  c.sums = stacks.map(a => a.reduce((t, s) => t + s.value, 0));
+  const sc = niceScale(Math.min(0, ...c.sums), Math.max(0, ...c.sums), cfg.integer);
+  const y = v => PT + PH * (sc.hi - v) / (sc.hi - sc.lo);
+
+  let axis = '', grid = '';
+  for (const t of sc.ticks) {
+    const yy = Math.round(y(t)) + 0.5;
+    axis += `<text x="${AW - 8}" y="${yy}" dy="0.35em" text-anchor="end">${cfg.fmtAxis(t)}</text>`;
+    grid += `<line class="${t === 0 ? 'zero' : 'grid'}" x1="0" x2="${W}" y1="${yy}" y2="${yy}"/>`;
+  }
+  c.yaxis.setAttribute('width', AW); c.yaxis.setAttribute('height', H);
+  c.yaxis.innerHTML = axis;
+
+  let slots = '';
+  c.geom = [];
+  buckets.forEach((b, i) => {
+    const cx = PADL + (i + 0.5) * slotW, x = cx - barW / 2;
+    const st = stacks[i];
+    let base = 0, top = y(0), parts = '';
+    st.forEach((s, j) => {
+      const y0 = y(base), y1 = y(base + s.value);
+      base += s.value;
+      let ry = Math.min(y0, y1), h = Math.abs(y1 - y0);
+      if (h < 2) { if (s.value > 0) ry = y0 - 2; h = 2; }        // cột rất nhỏ vẫn nhìn thấy
+      if (j > 0 && h > 4) h -= 2;                                 // khe 2px giữa các đoạn xếp chồng
+      const end = j === st.length - 1 ? (s.value > 0 ? 1 : -1) : 0;
+      parts += `<path class="seg-${s.key}" d="${barPath(x, ry, barW, h, 3, end)}"/>`;
+      top = Math.min(top, ry);
+    });
+    c.geom[i] = { cx, top };
+    slots += `<g class="slot" data-i="${i}">${parts}` + (showLabel(i)
+      ? `<text class="xl" transform="translate(${cx + 4},${PT + PH + 11}) rotate(-60)" text-anchor="end">${b.label}</text>` : '') + `</g>`;
   });
+  c.plot.setAttribute('width', W); c.plot.setAttribute('height', H);
+  c.plot.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  c.plot.classList.toggle('dense', dense);
+  c.plot.innerHTML = grid + `<rect class="band" y="0" height="${PT + PH}" width="0"/>` + slots;
+
+  if (c.sel < 0 || c.sel >= n || c.sums[c.sel] === 0) {
+    c.sel = -1;
+    for (let i = n - 1; i >= 0; i--) if (c.sums[i] !== 0) { c.sel = i; break; }
+  }
+  applySel(c);
+}
+
+function applySel(c) {
+  $$('.slot.sel', c.plot).forEach(g => g.classList.remove('sel'));
+  const band = $('.band', c.plot), bw = Math.max(c.slotW, 2);
+  band.setAttribute('width', c.sel >= 0 ? bw : 0);
+  if (c.sel >= 0) {
+    band.setAttribute('x', c.geom[c.sel].cx - bw / 2);
+    $(`.slot[data-i="${c.sel}"]`, c.plot).classList.add('sel');
+    const b = c.buckets[c.sel];
+    c.tip.innerHTML = `<div class="t">${b.title}</div>` + c.cfg.tip(b).map(r =>
+      `<div class="r">${r.sw ? `<i style="background:${r.sw}"></i>` : ''}<span>${r.label}:</span><b>${r.value}</b></div>`).join('');
+  }
+  positionTip(c);
+}
+
+function positionTip(c) {
+  const tip = c.tip;
+  if (c.sel < 0) { tip.hidden = true; return; }
+  const g = c.geom[c.sel];
+  const cx = AW + g.cx - c.vp.scrollLeft;
+  const wrapW = c.root.clientWidth;
+  if (cx < AW - 2 || cx > wrapW + 2) { tip.hidden = true; return; }   // cột đã cuộn ra ngoài
+  tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let top = g.top - h - 9, left, side = false;
+  if (top < 0) {                                  // cột quá cao: đặt tooltip sang bên cạnh
+    side = true; top = 0;
+    left = cx + c.barW / 2 + 8;
+    if (left + w > wrapW) left = cx - c.barW / 2 - 8 - w;
+    left = Math.max(0, left);
+  } else {
+    left = Math.min(Math.max(cx - w / 2, 0), wrapW - w);
+  }
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+  tip.classList.toggle('side', side);
+  tip.style.setProperty('--cx', Math.min(Math.max(cx - left, 10), w - 10) + 'px');
+}
+
+/* ---------- hai biểu đồ ---------- */
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+makeChart('chartFollow', {
+  keys: ['up', 'down'], integer: true, fmtAxis: fmtAxisInt,
+  segs: b => [{ key: b.net >= 0 ? 'up' : 'down', value: b.net }],
+  tip: b => [
+    { label: 'Biến động TK', value: signed(b.net) },
+    { label: 'Tổng TK theo dõi', value: fmt(b.total) }
+  ]
 });
-renderHeader();
-render();
+makeChart('chartFee', {
+  keys: ['new', 'renew'], integer: false, fmtAxis: fmtAxisMoney,
+  segs: b => [{ key: 'new', value: b.feeNew }, { key: 'renew', value: b.feeRenew }],
+  tip: b => [
+    { sw: css('--renew'), label: 'Phí gia hạn', value: fmt(b.feeRenew) },
+    { sw: css('--up'), label: 'Phí đăng ký mới', value: fmt(b.feeNew) },
+    { label: 'Tổng phí', value: fmt(b.feeNew + b.feeRenew) }
+  ]
+});
+
+/* ---------- điều khiển ---------- */
+const state = { mode: 'day', range: 1 };
+
+function update() {
+  const isDay = state.mode === 'day';
+  const buckets = isDay ? dayBuckets(state.range) : monthBuckets();
+
+  $$('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === state.mode));
+  $$('#chips button').forEach(b => b.setAttribute('aria-pressed', +b.dataset.range === state.range));
+  $('#chips').hidden = !isDay;
+
+  for (const c of charts) { c.buckets = buckets; c.fit = !isDay; c.sel = -1; render(c, false); }
+}
+
+$$('.seg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; update(); }));
+$$('#chips button').forEach(b => b.addEventListener('click', () => { state.range = +b.dataset.range; update(); }));
+$$('.info').forEach(b => b.addEventListener('click', () => {
+  const hint = document.getElementById(b.getAttribute('aria-controls'));
+  hint.hidden = !hint.hidden;
+  b.setAttribute('aria-expanded', !hint.hidden);
+}));
+
+let raf = 0;
+window.addEventListener('resize', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => charts.forEach(c => render(c, false))); });
+
+$('#asOf').textContent = dmy(TODAY);
+update();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => charts.forEach(c => positionTip(c)));
 </script>
 </body>
 </html>
